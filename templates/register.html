@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Budget Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="background-ambient">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="app-container" style="justify-content: center; min-height: 80vh;">
+        <h1 style="text-align: center; margin-bottom: 20px;">Create Account</h1>
+
+        <div class="glass-panel" style="padding: 32px; border-radius: 24px;">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div
+                style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 12px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                {{ messages[0] }}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/register">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" name="name" placeholder="Full Name" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" name="email" placeholder="Email Address" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" name="password" placeholder="Password" required>
+                    </div>
+                </div>
+                <button type="submit" class="primary-btn">Sign Up</button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; color: var(--text-muted);">
+                Already have an account? <a href="/login"
+                    style="color: var(--accent); text-decoration: none; font-weight: 600;">Login</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
