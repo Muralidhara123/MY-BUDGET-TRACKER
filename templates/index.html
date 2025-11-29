@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Expense Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="background-ambient">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="app-container">
+        <header>
+            <h1>My Budget Tracker</h1>
+            <p class="date-display" id="currentDate"></p>
+        </header>
+
+        <section class="balance-card">
+            <div class="balance-header">
+                <span class="label">Remaining Balance</span>
+                <button id="editBudgetBtn" class="icon-btn-small" aria-label="Edit Budget">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
+            </div>
+            <h2 id="remainingBalance">...</h2>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="budgetProgressBar"></div>
+            </div>
+
+            <div class="budget-info">
+                <div class="stat">
+                    <span class="label">Budget</span>
+                    <span class="value" id="monthlyBudget">...</span>
+                </div>
+                <div class="stat" style="text-align: right;">
+                    <span class="label">Spent</span>
+                    <span class="value" id="totalSpent">...</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="add-expense">
+            <h3>Add Expense</h3>
+            <form id="expenseForm">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <input type="text" id="itemInput" placeholder="What did you buy?" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group" style="flex: 1;">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <input type="number" id="quantityInput" placeholder="Qty" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="input-group" style="flex: 2;">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            <input type="number" id="costInput" placeholder="Total Cost" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="primary-btn">
+                    <span>Add Transaction</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </form>
+        </section>
+
+        <section class="transactions">
+            <h3>Recent Transactions</h3>
+            <ul id="transactionList" class="transaction-list">
+                <!-- Transactions will be injected here -->
+            </ul>
+        </section>
+
+        <footer style="margin-top: 20px; text-align: center;">
+            <button id="resetAppBtn" class="text-danger-btn">Reset All Data</button>
+        </footer>
+    </div>
+
+    <!-- Budget Modal -->
+    <div id="budgetModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Set Monthly Budget</h3>
+            <input type="number" id="newBudgetInput" placeholder="Enter amount" step="0.01">
+            <div class="modal-actions">
+                <button id="cancelBudgetBtn" class="secondary-btn">Cancel</button>
+                <button id="saveBudgetBtn" class="primary-btn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
