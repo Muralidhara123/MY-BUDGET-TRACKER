@@ -71,16 +71,59 @@ def init_db():
             )
         ''')
         
-        # Migrations for existing tables (if any)
-        try:
-            cursor.execute('ALTER TABLE expenses ADD COLUMN user_id INTEGER DEFAULT 1')
-        except sqlite3.OperationalError:
-            pass
-            
-        try:
-            cursor.execute('ALTER TABLE budget ADD COLUMN user_id INTEGER DEFAULT 1')
-        except sqlite3.OperationalError:
-            pass
+        # --- Advanced Migration: Recreate budget table to fix constraints ---
+        # Check if we need to migrate (e.g. if the old unique constraint exists)
+        # For simplicity in this context, we will check if the table schema is the old one or just force migration if 'user_id' column was just added?
+        # A safe way is to check if we can insert a duplicate month for a different user.
+        # But easier: Just perform the migration if we suspect it's the old table.
+        # We can check PRAGMA index_list('budget') to see if the wrong index exists, but that's complex.
+        
+        # Let's do a safe migration:
+        # 1. Rename table
+        # 2. Create new table
+        # 3. Copy data
+        # 4. Drop old table
+        
+        # We only do this if we haven't done it yet. How to know?
+        # We can check if the table sql contains "UNIQUE(user_id, month_str)"
+        
+        cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='budget'")
+        result = cursor.fetchone()
+        if result:
+            create_sql = result[0]
+            if 'UNIQUE(user_id, month_str)' not in create_sql:
+                print("Migrating budget table schema...")
+                try:
+                    cursor.execute("ALTER TABLE budget RENAME TO budget_old")
+                    
+                    # Create new table with correct schema
+                    cursor.execute('''
+                        CREATE TABLE budget (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            user_id INTEGER NOT NULL,
+                            amount REAL NOT NULL,
+                            month_str TEXT NOT NULL,
+                            FOREIGN KEY (user_id) REFERENCES users (id),
+                            UNIQUE(user_id, month_str)
+                        )
+                    ''')
+                    
+                    # Copy data (handle missing user_id in old data by defaulting to 1)
+                    # Check columns in budget_old
+                    cursor.execute("PRAGMA table_info(budget_old)")
+                    columns = [info[1] for info in cursor.fetchall()]
+                    
+                    if 'user_id' in columns:
+                        cursor.execute("INSERT INTO budget (id, user_id, amount, month_str) SELECT id, user_id, amount, month_str FROM budget_old")
+                    else:
+                        cursor.execute("INSERT INTO budget (id, user_id, amount, month_str) SELECT id, 1, amount, month_str FROM budget_old")
+                        
+                    cursor.execute("DROP TABLE budget_old")
+                    print("Budget table migration successful.")
+                except Exception as e:
+                    print(f"Migration failed: {e}")
+                    # Attempt to rollback/restore if needed, or just let it fail so we know.
+                    pass
 
         conn.commit()
 
@@ -232,4 +275,17 @@ def reset_data():
 
 if __name__ == '__main__':
     init_db()
+    
+    # Optional: Start ngrok for public access
+    try:
+        from pyngrok import ngrok
+        # Open a HTTP tunnel on the default port 5000
+        public_url = ngrok.connect(5000).public_url
+        print(f" * Public URL: {public_url}")
+        print(" * Share this URL to access the app from mobile data!")
+    except ImportError:
+        print(" * Install pyngrok for public access: pip install pyngrok")
+    except Exception as e:
+        print(f" * Ngrok error: {e}")
+
     app.run(debug=True, host='0.0.0.0', port=5000)
